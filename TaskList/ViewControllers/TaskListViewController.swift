@@ -94,7 +94,6 @@ class TaskListViewController: UITableViewController {
                 print(error)
             }
         }
-        
     }
 }
     
@@ -132,8 +131,30 @@ extension TaskListViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let rowSelected = taskList[indexPath.row]
         
-        showAlert(withTitle: "Update Task", andMessage: "What do you want to do?")
+        let alert = UIAlertController(title: "Update task", message: "What do you want to do?", preferredStyle: .alert)
         
+        let saveAction = UIAlertAction(title: "Save", style: .default) { [unowned self] _ in
+            guard let task = alert.textFields?.first?.text, !task.isEmpty else { return }
+//            let fetchTask = Task.fetchRequest()
+//
+//            let result = try? viewContext.fetch(fetchTask)
+//
+//            if result != task {
+//
+//            }
+            
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive)
+        
+        alert.addAction(saveAction)
+        alert.addAction(cancelAction)
+        alert.addTextField { textField in
+            textField.placeholder = "New Task"
+            textField.text = rowSelected.title
+        }
+        
+        present(alert, animated: true)
         
     }
 }
