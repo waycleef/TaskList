@@ -6,23 +6,21 @@
 //
 
 import UIKit
-import CoreData
-
-
 
 class TaskListViewController: UITableViewController {
     
     private let cellID = "task"
     private var taskList: [Task] = []
-    private let viewContext = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-
+    private let viewContext = StorageManager.shared.persistentContainer.viewContext
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         setupNavigationBar()
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellID)
+        fetchData()
     }
-
+    
     private func setupNavigationBar() {
         title = "Task List"
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -82,7 +80,7 @@ class TaskListViewController: UITableViewController {
     private func save(_ taskName: String) {
         
         let task = Task(context: viewContext)
-       
+        
         task.title = taskName
         taskList.append(task)
         
@@ -96,11 +94,11 @@ class TaskListViewController: UITableViewController {
                 print(error)
             }
         }
-    
+        
     }
 }
-
-// MARK: - Table View Data Source
+    
+    // MARK: - Table View Data Source
 extension TaskListViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         taskList.count
@@ -116,9 +114,29 @@ extension TaskListViewController {
         return cell
     }
     
-    override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        UISwipeActionsConfiguration()
+        override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+            let deleteButton = deleteAction(at: indexPath)
+            return UISwipeActionsConfiguration(actions: [deleteButton])
+        }
+    
+        func deleteAction(at indexPath: IndexPath) -> UIContextualAction {
+            let action = UIContextualAction(style: .destructive, title: "Delete") { action, view, completion in
+                self.taskList.remove(at: indexPath.row)
+                self.tableView.deleteRows(at: [indexPath], with: .automatic)
+    
+                completion(true)
+            }
+            return action
+        }
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let rowSelected = taskList[indexPath.row]
+        
+        showAlert(withTitle: "Update Task", andMessage: "What do you want to do?")
+        
+        
     }
 }
 
+    
 
