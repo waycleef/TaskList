@@ -113,20 +113,34 @@ extension TaskListViewController {
         return cell
     }
     
-        override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-            let deleteButton = deleteAction(at: indexPath)
-            return UISwipeActionsConfiguration(actions: [deleteButton])
-        }
+    override func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
+        .delete
+    }
     
-        func deleteAction(at indexPath: IndexPath) -> UIContextualAction {
-            let action = UIContextualAction(style: .destructive, title: "Delete") { action, view, completion in
-                self.taskList.remove(at: indexPath.row)
-                self.tableView.deleteRows(at: [indexPath], with: .automatic)
-    
-                completion(true)
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        let task = taskList[indexPath.row]
+
+        if editingStyle == .delete {
+            viewContext.delete(task)
+            
+            do {
+                try viewContext.save()
+            } catch let error as NSError {
+                print("Error While Deleting Task: \(error.userInfo)")
             }
-            return action
         }
+        self.loadSaveData()
+    }
+    
+    func loadSaveData() {
+        let fetchRequest = Task.fetchRequest()
+        do {
+            taskList = try viewContext.fetch(fetchRequest)
+            tableView.reloadData()
+        } catch {
+            print("Could not load save data: \(error.localizedDescription)")
+        }
+    }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let rowSelected = taskList[indexPath.row]
